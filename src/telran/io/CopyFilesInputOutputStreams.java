@@ -43,10 +43,9 @@ static File[] files;
 
 	}
 	private static void copyFiles() throws Exception{
-		InputStream input = new FileInputStream(files[0]);
-		OutputStream output = null;
-		try {
-			output = new FileOutputStream(files[1]);
+		
+		try (InputStream input = new FileInputStream(files[0]);
+				OutputStream output = new FileOutputStream(files[1]);){
 			copyStreams(input, output);
 		} catch (FileNotFoundException e) {
 			throw new Exception(String.format(NO_DIRECTORY_DESTINATION,
