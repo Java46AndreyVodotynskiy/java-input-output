@@ -44,5 +44,9 @@ public boolean equals(Object obj) {
 	return Objects.equals(department, other.department) && id == other.id && Objects.equals(name, other.name)
 			&& salary == other.salary;
 }
+@Override
+public String toString() {
+	return "Employee [id=" + id + ", name=" + name + ", department=" + department + ", salary=" + salary + "]";
+}
 
 }

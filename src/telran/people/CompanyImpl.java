@@ -1,5 +1,6 @@
 package telran.people;
 import java.util.*;
+import java.io.*;
 public class CompanyImpl implements Company {
 
 	private HashMap<Long, Employee> employees = new HashMap<>();
@@ -9,46 +10,60 @@ public class CompanyImpl implements Company {
 	private CompanyImpl() {
 		
 	}
-	public static Company CreateCompany(String fileName) throws Exception {
-		//TODO
-		//if file exists it restore Company from file, otherwise returns empty CompanyImpl object
-		return null;
+	public static Company createCompany(String fileName) throws Exception {
+		File file = new File(fileName);
+		
+		return file.exists() ? restoreFromFile(file) : new CompanyImpl();
 	}
 
+	private static Company restoreFromFile(File file) throws Exception {
+		try(ObjectInputStream input = new ObjectInputStream(new FileInputStream(file))){
+			return (Company) input.readObject();
+		}
+	}
 	@Override
 	public Iterable<Employee> getAllEmployees() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return employees.values();
 	}
 
 	@Override
 	public void addEmployee(Employee empl) throws Exception {
-		// TODO Auto-generated method stub
+		long id = empl.getId();
+		if (employees.putIfAbsent(id, empl) != null) {
+			throw new Exception(String.format("Employee with id %d already exists", id));
+		}
+		employeesDepartment.computeIfAbsent(empl.getDepartment(),
+				v -> new ArrayList<>()).add(empl);
+		employeesSalary.computeIfAbsent(empl.getSalary(), v -> new ArrayList<>()).add(empl);
 
 	}
 
 	@Override
 	public void save(String filePath) throws Exception {
-		// TODO Auto-generated method stub
+		try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(filePath))) {
+			output.writeObject(this);
+		}
 
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesDepartment(String department) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return employeesDepartment.getOrDefault(department, Collections.emptyList());
 	}
 
 	@Override
 	public Iterable<Employee> getEmployeesSalary(int salaryFrom, int salaryTo) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return employeesSalary.subMap(salaryFrom, true, salaryTo, true)
+				.values().stream().flatMap(Collection::stream).toList();
 	}
 
 	@Override
 	public Employee getEmployee(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return employees.get(id);
 	}
 
 }
